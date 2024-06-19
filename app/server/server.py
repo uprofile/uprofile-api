@@ -4,10 +4,13 @@ from contextlib import asynccontextmanager
 
 import fastapi
 import pydantic
-from core import exceptions
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from json_advanced import dumps
+
+from apps.business.routes import router as business_router
+from apps.profiles.routes import router as profile_router
+from core import exceptions
 
 from . import config, db
 
@@ -93,6 +96,10 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-async def index():
-    return {"message": "Hello World!"}
+app.include_router(business_router)
+app.include_router(profile_router)
+
+
+@app.get("/health")
+async def health():
+    return {"status": "UP"}
