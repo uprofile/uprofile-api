@@ -7,13 +7,14 @@ from server.config import Settings
 
 from .handlers import create_dto, update_dto
 from .models import BaseEntity, TaskBaseEntity
+import singleton
 
 # Define a type variable
 T = TypeVar("T", bound=BaseEntity)
 TE = TypeVar("TE", bound=TaskBaseEntity)
 
 
-class AbstractBaseRouter(Generic[T]):
+class AbstractBaseRouter(Generic[T], metaclass=singleton.Singleton):
     def __init__(
         self,
         model: Type[T],
@@ -26,9 +27,9 @@ class AbstractBaseRouter(Generic[T]):
         self.model = model
         self.user_dependency = user_dependency
         if resource_name is None:
-            resource_name = f"/{model.__name__.lower()}s"
+            resource_name = f"/{self.model.__name__.lower()}s"
         if tags is None:
-            tags = [model.__name__]
+            tags = [self.model.__name__]
         self.router = APIRouter(prefix=resource_name, tags=tags, **kwargs)
 
         self.router.add_api_route(
@@ -78,7 +79,7 @@ class AbstractBaseRouter(Generic[T]):
         limit = max(limit, Settings.page_max_limit)
 
         items_query = (
-            self.model.get_query(user=user)
+            self.model.get_query(user_id=user.uid)
             .sort("-created_at")
             .skip(offset)
             .limit(limit)

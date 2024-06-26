@@ -7,6 +7,7 @@ import pydantic
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from json_advanced import dumps
+from usso.exceptions import USSOException
 
 from apps.business.routes import router as business_router
 from apps.profiles.routes import router as profile_router
@@ -47,6 +48,14 @@ app = fastapi.FastAPI(
 async def base_http_exception_handler(
     request: fastapi.Request, exc: exceptions.BaseHTTPException
 ):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"message": exc.message, "error": exc.error},
+    )
+
+
+@app.exception_handler(USSOException)
+async def usso_exception_handler(request: fastapi.Request, exc: USSOException):
     return JSONResponse(
         status_code=exc.status_code,
         content={"message": exc.message, "error": exc.error},

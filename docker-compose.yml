@@ -1,4 +1,4 @@
-services:  
+services:
   app:
     build: app
     restart: unless-stopped
@@ -6,19 +6,20 @@ services:
       - .env
     volumes:
       - ./app:/app
+    ports:
+      - 3017:3000
     networks:
       - data
       - traefik-net
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.${PROJECT_NAME}.entrypoints=web"
-      - "traefik.http.routers.${PROJECT_NAME}.rule=Host(`${DOMAIN}`)"
-      # - "traefik.http.routers.${PROJECT_NAME}.middlewares=https-redirect"
-      - "traefik.http.routers.${PROJECT_NAME}-secure.entrypoints=websecure"
-      - "traefik.http.routers.${PROJECT_NAME}-secure.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.${PROJECT_NAME}-secure.tls=true"
-      - "traefik.http.routers.${PROJECT_NAME}-secure.tls.certresolver=letsencrypt"
-      - "traefik.http.services.${PROJECT_NAME}.loadbalancer.server.port=8000"
+      - "traefik.http.routers.${PROJECT_NAME}-express.entrypoints=web"
+      - "traefik.http.routers.${PROJECT_NAME}-express.rule=${DOMAINS}"
+      - "traefik.http.services.${PROJECT_NAME}-express.loadbalancer.server.port=8000"
+      - "traefik.http.routers.${PROJECT_NAME}-express-secure.entrypoints=websecure"
+      - "traefik.http.routers.${PROJECT_NAME}-express-secure.rule=${DOMAINS}"
+      - "traefik.http.routers.${PROJECT_NAME}-express-secure.tls=true"
+      - "traefik.http.routers.${PROJECT_NAME}-express-secure.tls.certresolver=letsencrypt"
       - "traefik.docker.network=traefik-net"
 
   redis:

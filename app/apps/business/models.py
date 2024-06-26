@@ -1,4 +1,5 @@
 from pydantic import BaseModel, model_validator
+from pymongo import IndexModel, ASCENDING
 
 from apps.base.models import OwnedEntity
 from apps.plugins.models import Plugin
@@ -17,11 +18,11 @@ class Business(OwnedEntity):
     field_config: FieldConfig
     plugins: list[Plugin] = []
 
-    # class Settings:
-    #     indexes = [
-    #         {"keys": [("name", 1)], "unique": True},
-    #         {"keys": [("domain", 1)], "unique": True},
-    #     ]
+    class Settings:
+        indexes = [
+            IndexModel([("name", ASCENDING)], unique=True),
+            IndexModel([("domain", ASCENDING)], unique=True),
+        ]
 
     @classmethod
     async def get_by_origin(cls, origin: str):
@@ -29,7 +30,7 @@ class Business(OwnedEntity):
 
     @model_validator(mode="before")
     def validate_domain(data: dict):
-        business_name_domain = f"https://{data.get('name')}.{Settings.root_url}"
+        business_name_domain = f"{data.get('name')}.{Settings.root_url}"
         if not data.get("domain"):
             data["domain"] = business_name_domain
 

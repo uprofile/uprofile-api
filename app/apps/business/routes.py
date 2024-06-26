@@ -27,7 +27,7 @@ class AbstractBusinessBaseRouter(AbstractBaseRouter[T]):
         limit = max(limit, Settings.page_max_limit)
 
         items_query = (
-            self.model.get_query(business=business, user=user)
+            self.model.get_query(business_id=business.uid, user_id=user.uid)
             .sort("-created_at")
             .skip(offset)
             .limit(limit)
@@ -42,7 +42,7 @@ class AbstractBusinessBaseRouter(AbstractBaseRouter[T]):
         business: Business = Depends(get_business),
     ):
         user = await self.get_user(request)
-        item = await self.model.get_item(uid, business=business, user=user)
+        item = await self.model.get_item(uid, business_id=business.uid, user_id=user.uid)
         if item is None:
             raise BaseHTTPException(
                 status_code=404,
@@ -54,7 +54,7 @@ class AbstractBusinessBaseRouter(AbstractBaseRouter[T]):
     async def create_item(
         self,
         request: Request,
-        business: Business = Depends(get_business),
+        # business: Business = Depends(get_business),
     ):
         user = await self.get_user(request)
         item = await create_dto_business(self.model)(request, user)
@@ -66,7 +66,7 @@ class AbstractBusinessBaseRouter(AbstractBaseRouter[T]):
         self,
         request: Request,
         uid,
-        business: Business = Depends(get_business),
+        # business: Business = Depends(get_business),
     ):
         user = await self.get_user(request)
         item = await update_dto_business(self.model)(request, user)
@@ -86,7 +86,7 @@ class AbstractBusinessBaseRouter(AbstractBaseRouter[T]):
         business: Business = Depends(get_business),
     ):
         user = await self.get_user(request)
-        item = await self.model.get_item(uid, business=business, user=user)
+        item = await self.model.get_item(uid, business_id=business.uid, user_id=user.uid)
         if item is None:
             raise BaseHTTPException(
                 status_code=404,

@@ -94,13 +94,20 @@ class OwnedEntity(BaseEntity):
         return self.model_dump(exclude=self.create_exclude_set) | {"user_id": user_id}
 
     @classmethod
-    def get_query(cls, user, *args, **kwargs):
-        query = cls.find(cls.is_deleted == False, cls.user_id == user.uid)
+    def get_query(cls, user_id, *args, **kwargs):
+        query_conditions = [
+            cls.is_deleted == False,
+        ]
+
+        if user_id is not None:
+            query_conditions.append(cls.user_id == user_id)
+
+        query = cls.find(*query_conditions)
         return query
 
     @classmethod
-    async def get_item(cls, uid, user, *args, **kwargs) -> "OwnedEntity":
-        query = cls.get_query(user, *args, **kwargs).find(cls.uid == uid)
+    async def get_item(cls, uid, user_id, *args, **kwargs) -> "OwnedEntity":
+        query = cls.get_query(user_id, *args, **kwargs).find(cls.uid == uid)
         items = await query.to_list()
         if not items:
             return None
@@ -130,13 +137,13 @@ class BusinessEntity(BaseEntity):
         }
 
     @classmethod
-    def get_query(cls, business, *args, **kwargs):
-        query = cls.find(cls.is_deleted == False, cls.business_id == business.uid)
+    def get_query(cls, business_id, *args, **kwargs):
+        query = cls.find(cls.is_deleted == False, cls.business_id == business_id)
         return query
 
     @classmethod
-    async def get_item(cls, uid, business, *args, **kwargs) -> "BusinessEntity":
-        query = cls.get_query(business, *args, **kwargs).find(cls.uid == uid)
+    async def get_item(cls, uid, business_id, *args, **kwargs) -> "BusinessEntity":
+        query = cls.get_query(business_id, *args, **kwargs).find(cls.uid == uid)
         items = await query.to_list()
         if not items:
             return None
@@ -173,17 +180,21 @@ class BusinessOwnedEntity(OwnedEntity, BusinessEntity):
         }
 
     @classmethod
-    def get_query(cls, business, user, *args, **kwargs):
-        query = cls.find(
+    def get_query(cls, business_id, user_id, *args, **kwargs):
+        query_conditions = [
             cls.is_deleted == False,
-            cls.business_id == business.uid,
-            cls.user_id == user.uid,
-        )
+            cls.business_id == business_id,
+        ]
+
+        if user_id is not None:
+            query_conditions.append(cls.user_id == user_id)
+
+        query = cls.find(*query_conditions)
         return query
 
     @classmethod
-    async def get_item(cls, uid, business, user, *args, **kwargs) -> "BusinessEntity":
-        query = cls.get_query(business, user, *args, **kwargs).find(cls.uid == uid)
+    async def get_item(cls, uid, business_id, user_id, *args, **kwargs) -> "BusinessEntity":
+        query = cls.get_query(business_id, user_id, *args, **kwargs).find(cls.uid == uid)
         items = await query.to_list()
         if not items:
             return None
