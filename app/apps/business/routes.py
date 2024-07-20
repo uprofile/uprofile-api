@@ -24,7 +24,7 @@ class AbstractBusinessBaseRouter(AbstractBaseRouter[T]):
         business: Business = Depends(get_business),
     ):
         user = await self.get_user(request)
-        limit = max(limit, Settings.page_max_limit)
+        limit = max(1, min(limit, Settings.page_max_limit))
 
         items_query = (
             self.model.get_query(business_id=business.uid, user_id=user.uid)
