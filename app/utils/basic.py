@@ -1,6 +1,7 @@
 import asyncio
 import logging
 
+
 def get_all_subclasses(cls: type):
     subclasses = cls.__subclasses__()
     return subclasses + [

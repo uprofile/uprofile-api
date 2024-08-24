@@ -1,8 +1,7 @@
-from pydantic import BaseModel, model_validator
-from pymongo import IndexModel, ASCENDING
-
 from apps.base.models import OwnedEntity
 from apps.plugins.models import Plugin
+from pydantic import BaseModel, model_validator
+from pymongo import ASCENDING, IndexModel
 from server.config import Settings
 
 

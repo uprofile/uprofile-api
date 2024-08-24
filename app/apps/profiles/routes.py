@@ -2,11 +2,10 @@ from apps.business.handlers import create_dto_business
 from apps.business.middlewares import get_business
 from apps.business.models import Business
 from apps.business.routes import AbstractBusinessBaseRouter
-from fastapi import Depends, Request, APIRouter
+from core.exceptions import BaseHTTPException
+from fastapi import APIRouter, Depends, Request
 from server.config import Settings
 from usso.fastapi import jwt_access_security
-
-from core.exceptions import BaseHTTPException
 
 from .models import Profile
 

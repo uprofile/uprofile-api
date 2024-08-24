@@ -5,11 +5,11 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Callable, Coroutine, Literal, Union
 
-from beanie import Document, Insert, Replace, Save, SaveChanges, Update, before_event
+from beanie import (Document, Insert, Replace, Save, SaveChanges, Update,
+                    before_event)
 from json_advanced import dumps
 from pydantic import BaseModel, Field
 from singleton import Singleton
-
 from utils import aionetwork, basic
 
 

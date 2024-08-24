@@ -2,14 +2,15 @@ services:
   app:
     build: app
     restart: unless-stopped
+    command: python app.py
     env_file:
       - .env
     volumes:
       - ./app:/app
-    ports:
-      - 3017:3000
+    # ports:
+    #   - 3017:3000
     networks:
-      - data
+      # - data
       - mongo-net
       - traefik-net
     labels:
@@ -23,16 +24,16 @@ services:
       - "traefik.http.routers.${PROJECT_NAME}-express-secure.tls.certresolver=letsencrypt"
       - "traefik.docker.network=traefik-net"
 
-  redis:
-    image: redis:alpine
-    restart: unless-stopped
-    volumes:
-      - ./redis.data:/data
-    networks:
-      - data
+  # redis:
+  #   image: redis:alpine
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./redis.data:/data
+  #   networks:
+  #     - data
 
 networks:
-  data:
+  # data:
   mongo-net:
     external: true
   traefik-net:

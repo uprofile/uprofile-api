@@ -4,14 +4,13 @@ from contextlib import asynccontextmanager
 
 import fastapi
 import pydantic
+from apps.business.routes import router as business_router
+from apps.profiles.routes import router as profile_router
+from core import exceptions
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from json_advanced import dumps
 from usso.exceptions import USSOException
-
-from apps.business.routes import router as business_router
-from apps.profiles.routes import router as profile_router
-from core import exceptions
 
 from . import config, db
 
