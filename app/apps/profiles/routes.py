@@ -1,111 +1,73 @@
-from apps.business.handlers import create_dto_business
-from apps.business.middlewares import get_business
-from apps.business.models import Business
-from apps.business.routes import AbstractBusinessBaseRouter
-from core.exceptions import BaseHTTPException
-from fastapi import APIRouter, Depends, Request
-from server.config import Settings
+import uuid
+from datetime import datetime
+
+from fastapi import Query, Request
+
+# import routes import AbstractAuthRouter
+from ufaas_fastapi_business.routes import AbstractAuthRouter
 from usso.fastapi import jwt_access_security
 
+from apps.business.middlewares import authorization_middleware
+from server.config import Settings
+
 from .models import Profile
+from .schemas import ProfileCreateSchema, ProfileSchema, ProfileUpdateSchema
 
 
-class ProfileRouter(AbstractBusinessBaseRouter[Profile]):
+class ProfileRouter(AbstractAuthRouter[Profile, ProfileSchema]):
 
-    def __init__(    self):
-        self.model = Profile
-        self.user_dependency = jwt_access_security
-        tags = [self.model.__name__]
-        self.router = APIRouter(prefix='/profiles', tags=tags)
-
-        self.router.add_api_route(
-            "/",
-            self.list_items,
-            methods=["GET"],
-            response_model=list[self.model],
-        )
-        self.router.add_api_route(
-            "/{uid:uuid}",
-            self.retrieve_item,
-            methods=["GET"],
-            response_model=self.model,
-        )
-        self.router.add_api_route(
-            "/",
-            self.create_item,
-            methods=["POST"],
-            response_model=self.model,
-            status_code=201,
-        )
-        self.router.add_api_route(
-            "/{uid:uuid}",
-            self.update_item,
-            methods=["PATCH"],
-            response_model=self.model,
-        )
-        self.router.add_api_route(
-            "/{uid:uuid}",
-            self.delete_item,
-            methods=["DELETE"],
-            response_model=self.model,
+    def __init__(self):
+        super().__init__(
+            model=Profile, schema=ProfileSchema, user_dependency=jwt_access_security
         )
 
-    # def __init__(self):
-    #     super().__init__(
-    #         model=Profile,
-    #         user_dependency=jwt_access_security,
-    #         resource_name="/profiles",
-    #     )
+    async def get_auth(self, request: Request):
+        return await authorization_middleware(request)
 
     async def list_items(
         self,
         request: Request,
-        offset: int = 0,
-        limit: int = 10,
-        business: Business = Depends(get_business),
+        offset: int = Query(0, ge=0),
+        limit: int = Query(10, ge=0, le=Settings.page_max_limit),
+        created_at_from: datetime | None = None,
+        created_at_to: datetime | None = None,
+        user_id: uuid.UUID | None = None,
     ):
-        user = await self.get_user(request)
-        limit = max(1, min(limit, Settings.page_max_limit))
-
-        items_query = (
-            self.model.get_query(
-                business_id=business.uid,
-                user_id=None if business.user_id == user.uid else user.uid,
-            )
-            .sort("-created_at")
-            .skip(offset)
-            .limit(limit)
+        return await super().list_items(
+            request, offset, limit, created_at_from, created_at_to
         )
-        items = await items_query.to_list()
-        return items
 
-    async def retrieve_item(
-        self,
-        request: Request,
-        uid,
-        business: Business = Depends(get_business),
-    ):
-        user = await self.get_user(request)
-        item = await self.model.get_item(
-            uid,
-            business_id=business.uid,
-            user_id=None if business.user_id == user.uid else user.uid,
-        )
+    async def retrieve_item(self, request: Request, uid: uuid.UUID):
+        import logging
+
+        auth = await self.get_auth(request)
+        # item = await self.get_item(
+        item = await Profile.find_one({"uid": uid, "business_name": auth.business.name})
+        logging.info(f"{uid} {item} {auth.business.name}")
         if item is None:
+            from fastapi_mongo_base.core.exceptions import BaseHTTPException
+
             raise BaseHTTPException(
                 status_code=404,
                 error="item_not_found",
                 message=f"{self.model.__name__.capitalize()} not found",
             )
+
         return item
 
-    async def create_item(self, request: Request):
-        user = await self.get_user(request)
-        item: Profile = await create_dto_business(self.model)(request, user)
-        item.uid = item.user_id
-
+    async def create_item(self, request: Request, profile: ProfileCreateSchema):
+        auth = await self.get_auth(request)
+        profile.user_id = auth.user_id
+        item = self.model(business_name=auth.business.name, **profile.model_dump())
+        # if auth.issuer_type == "User":
+        item.uid = uuid.UUID(auth.user_id)
         await item.save()
-        return item
+        return self.create_response_schema(**item.model_dump())
+
+    async def update_item(
+        self, request: Request, uid: uuid.UUID, profile: ProfileUpdateSchema
+    ):
+        return await super().update_item(request, uid, profile.model_dump())
 
 
 router = ProfileRouter().router

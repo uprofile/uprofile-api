@@ -1,67 +1,14 @@
 """FastAPI server configuration."""
 
-import dataclasses
-import logging
-import logging.config
-import os
 from pathlib import Path
 
 import dotenv
-from singleton import Singleton
+from ufaas_fastapi_business.core.config import Settings as BaseSettings
 
 dotenv.load_dotenv()
-base_dir = Path(__file__).resolve().parent.parent
 
 
-@dataclasses.dataclass
-class Settings(metaclass=Singleton):
+class Settings(BaseSettings):
     """Server config settings."""
 
-    root_url: str = os.getenv("DOMAIN", default="http://localhost:8000")
-    mongo_uri: str = os.getenv("MONGO_URI", default="mongodb://localhost:27017")
-    redis_uri: str = os.getenv("REDIS_URI", default="redis://localhost:6379")
-    project_name: str = os.getenv("PROJECT_NAME", default="FastAPI Launchpad")
-
-    page_max_limit: int = 50
-
-    testing: bool = os.getenv("TESTING", default=False)
-
-    log_config = {
-        "version": 1,
-        "handlers": {
-            "console": {
-                "class": "logging.StreamHandler",
-                "level": "WARNING",
-                "formatter": "standard",
-            },
-            "file": {
-                "class": "logging.FileHandler",
-                "level": "INFO",
-                "filename": base_dir / "logs" / "info.log",
-                "formatter": "standard",
-            },
-        },
-        "formatters": {
-            "standard": {
-                "format": "[{levelname} : {filename}:{lineno} : {asctime} -> {funcName:10}] {message}",
-                # "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                "style": "{",
-            }
-        },
-        "loggers": {
-            "": {
-                "handlers": [
-                    "console",
-                    "file",
-                ],
-                "level": "INFO",
-                "propagate": True,
-            }
-        },
-    }
-
-    def config_logger(self):
-        if not (base_dir / "logs").exists():
-            (base_dir / "logs").mkdir()
-
-        logging.config.dictConfig(self.log_config)
+    base_dir: Path = Path(__file__).resolve().parent.parent

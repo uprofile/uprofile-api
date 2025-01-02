@@ -1,4 +1,4 @@
-from apps.base.models import OwnedEntity
+from fastapi_mongo_base.models import OwnedEntity
 
 
 class Plugin(OwnedEntity):
