@@ -63,7 +63,8 @@ async def client() -> AsyncGenerator[httpx.AsyncClient, None]:
     """Fixture to provide an AsyncClient for FastAPI app."""
 
     async with httpx.AsyncClient(
-        app=httpx.ASGITransport(app=fastapi_app), base_url="http://profile.pixiee.io"
+        transport=httpx.ASGITransport(app=fastapi_app),
+        base_url="http://profile.pixiee.io",
     ) as ac:
         yield ac
 
