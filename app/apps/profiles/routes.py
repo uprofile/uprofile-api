@@ -1,14 +1,13 @@
 import uuid
 from datetime import datetime
 
+from apps.business.middlewares import authorization_middleware
 from fastapi import Query, Request
+from server.config import Settings
 
 # import routes import AbstractAuthRouter
 from ufaas_fastapi_business.routes import AbstractAuthRouter
 from usso.fastapi import jwt_access_security
-
-from apps.business.middlewares import authorization_middleware
-from server.config import Settings
 
 from .models import Profile
 from .schemas import ProfileCreateSchema, ProfileSchema, ProfileUpdateSchema

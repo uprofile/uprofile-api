@@ -1,7 +1,6 @@
-from fastapi_mongo_base.core import app_factory
-
 from apps.business.routes import router as business_router
 from apps.profiles.routes import router as profile_router
+from fastapi_mongo_base.core import app_factory
 
 from . import config
 
@@ -12,6 +11,8 @@ app = app_factory.create_app(
         "http://localhost:3000",
         "https://cmp.liara.run",
         "https://app.pixiee.io",
+        "https://pixiee.io",
+        "https://pixy.ir",
         "https://stg.pixiee.io",
         "https://cmp-dev.liara.run",
         "https://pixiee.bot.inbeet.tech",
@@ -23,3 +24,4 @@ app = app_factory.create_app(
 
 app.include_router(business_router)
 app.include_router(profile_router)
+

@@ -1,7 +1,6 @@
 from pydantic import BaseModel, model_validator
-from ufaas_fastapi_business.schemas import BusinessSchema as BaseBusinessSchema
-
 from server.config import Settings
+from ufaas_fastapi_business.schemas import BusinessSchema as BaseBusinessSchema
 
 
 class FieldConfig(BaseModel):
