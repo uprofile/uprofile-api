@@ -1,8 +1,10 @@
+import logging
 import uuid
 from datetime import datetime
 
 from apps.business.middlewares import authorization_middleware
 from fastapi import Query, Request
+from fastapi_mongo_base.core.exceptions import BaseHTTPException
 from server.config import Settings
 
 # import routes import AbstractAuthRouter
@@ -37,15 +39,11 @@ class ProfileRouter(AbstractAuthRouter[Profile, ProfileSchema]):
         )
 
     async def retrieve_item(self, request: Request, uid: uuid.UUID):
-        import logging
-
         auth = await self.get_auth(request)
         # item = await self.get_item(
         item = await Profile.find_one({"uid": uid, "business_name": auth.business.name})
         logging.info(f"{uid} {item} {auth.business.name}")
         if item is None:
-            from fastapi_mongo_base.core.exceptions import BaseHTTPException
-
             raise BaseHTTPException(
                 status_code=404,
                 error="item_not_found",
@@ -59,7 +57,7 @@ class ProfileRouter(AbstractAuthRouter[Profile, ProfileSchema]):
         profile.user_id = auth.user_id
         item = self.model(business_name=auth.business.name, **profile.model_dump())
         # if auth.issuer_type == "User":
-        item.uid = uuid.UUID(auth.user_id)
+        item.uid = uuid.UUID(auth.user_id) if isinstance(auth.user_id, str) else auth.user_id
         await item.save()
         return self.create_response_schema(**item.model_dump())
 

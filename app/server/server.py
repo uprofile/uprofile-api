@@ -24,4 +24,3 @@ app = app_factory.create_app(
 
 app.include_router(business_router)
 app.include_router(profile_router)
-
