@@ -9,15 +9,8 @@ app = app_factory.create_app(
     origins=[
         "http://localhost:8000",
         "http://localhost:3000",
-        "https://cmp.liara.run",
-        "https://app.pixiee.io",
         "https://pixiee.io",
         "https://pixy.ir",
-        "https://stg.pixiee.io",
-        "https://cmp-dev.liara.run",
-        "https://pixiee.bot.inbeet.tech",
-        "https://picsee.bot.inbeet.tech",
-        "https://dashboard.pixiee.bot.inbeet.tech",
     ],
     ufaas_handler=False,
 )
